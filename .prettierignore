@@ -1,0 +1,12 @@
+# 아티팩트를 무시합니다:
+build
+coverage
+
+# 모든 HTML 파일을 무시합니다:
+**/*.html
+
+# 기타 파일
+**/.git
+**/.svn
+**/.hg
+**/node_modules

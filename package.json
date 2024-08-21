@@ -1,0 +1,13 @@
+{
+  "name": "javascript_roguelike",
+  "version": "1.0.0",
+  "description": "자바스크립트로 로그라이크 구현",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module"
+}
