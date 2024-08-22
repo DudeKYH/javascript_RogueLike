@@ -6,11 +6,11 @@ export class Player {
         this.escapeObbs = escapeObbs;
     }
 
-    init() {
-        this.hp = 100;
-        this.baseAttackPower = 10;
-        this.powerRatio = 1;
-        this.escapeObbs = 5;
+    init(hp = 100, baseAttackPower = 10, powerRatio = 1, escapeObbs = 5) {
+        this.hp = hp;
+        this.baseAttackPower = baseAttackPower;
+        this.powerRatio = powerRatio;
+        this.escapeObbs = escapeObbs;
     }
 
     // 플레이어 Level Up

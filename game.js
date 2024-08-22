@@ -3,9 +3,9 @@ import { Stage } from './stage.js';
 
 // chcp 65001
 
-function getRandomNumber(size, startNum) {
+export function getRandomNumber(size, startNum) {
     // Math.random() : 0 이상 1 미난의 난수 return
-    return startNum + Math.random() * size;
+    return startNum + parseInt(Math.random() * size);
 }
 
 export async function startGame() {

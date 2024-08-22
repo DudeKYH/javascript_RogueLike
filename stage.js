@@ -1,6 +1,7 @@
 import chalk from 'chalk';
 import figlet from 'figlet';
 import readlineSync from 'readline-sync';
+import { getRandomNumber } from './game.js';
 import { Monster } from './monster.js';
 
 const stageStatusObjects = new Map();
@@ -36,9 +37,24 @@ export class Stage {
     }
 
     displayClear() {
+        console.clear();
+
+        const red = getRandomNumber(255, 0);
+        const green = getRandomNumber(255, 0);
+        const blue = getRandomNumber(255, 0);
+
         console.log(
-            chalk.cyan(
-                figlet.textSync(`Stage ${this.stageNum} Clear`, {
+            chalk.rgb(red, green, blue).bold(
+                figlet.textSync(`Stage    ${this.stageNum}`, {
+                    font: 'Standard',
+                    horizontalLayout: 'default',
+                    verticalLayout: 'default',
+                }),
+            ),
+        );
+        console.log(
+            chalk.rgb(red, green, blue).bold(
+                figlet.textSync(`              Clear!!!`, {
                     font: 'Standard',
                     horizontalLayout: 'default',
                     verticalLayout: 'default',
@@ -47,16 +63,45 @@ export class Stage {
         );
     }
 
+    async animateClear() {
+        for (let i = 0; i < 10; i++) {
+            this.displayClear();
+            await this.wait(100);
+        }
+    }
+
     displayLose() {
+        console.clear();
+
+        const red = getRandomNumber(255, 0);
+        const green = getRandomNumber(255, 0);
+        const blue = getRandomNumber(255, 0);
+
         console.log(
-            chalk.cyan(
-                figlet.textSync(`Stage ${this.stageNum} Defeat`, {
+            chalk.rgb(red, green, blue).bold(
+                figlet.textSync(`Game Over`, {
                     font: 'Standard',
                     horizontalLayout: 'default',
                     verticalLayout: 'default',
                 }),
             ),
         );
+        console.log(
+            chalk.rgb(red, green, blue).bold(
+                figlet.textSync(`     Restart!!!`, {
+                    font: 'Standard',
+                    horizontalLayout: 'default',
+                    verticalLayout: 'default',
+                }),
+            ),
+        );
+    }
+
+    async animateLose() {
+        for (let i = 0; i < 10; i++) {
+            this.displayLose();
+            await this.wait(100);
+        }
     }
 
     wait(timeDelay) {
@@ -65,18 +110,18 @@ export class Stage {
 
     async clear() {
         console.clear();
-        this.displayClear();
+        await this.animateClear();
 
+        // player 레벨 업
         this.player.levelUp();
-        //await this.wait(1000);
     }
 
     async lose() {
         console.clear();
-        this.displayClear();
+        await this.animateLose();
 
+        // player 레벨 1로 초기화
         this.player.init();
-        //await this.wait(1000);
     }
 
     async escape() {
