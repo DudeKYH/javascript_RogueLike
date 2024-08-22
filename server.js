@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import figlet from 'figlet';
 import readlineSync from 'readline-sync';
-import {startGame} from "./game.js";
+import { startGame } from './game.js';
 
 // 로비 화면을 출력하는 함수
 function displayLobby() {
@@ -10,12 +10,12 @@ function displayLobby() {
     // 타이틀 텍스트
     console.log(
         chalk.cyan(
-            figlet.textSync('RL- Javascript', {
+            figlet.textSync('RL- Javascript 1', {
                 font: 'Standard',
                 horizontalLayout: 'default',
-                verticalLayout: 'default'
-            })
-        )
+                verticalLayout: 'default',
+            }),
+        ),
     );
 
     // 상단 경계선
@@ -66,7 +66,6 @@ function handleUserInput() {
             console.log(chalk.red('게임을 종료합니다.'));
             // 게임 종료 로직을 구현
             process.exit(0); // 게임 종료
-            break;
         default:
             console.log(chalk.red('올바른 선택을 하세요.'));
             handleUserInput(); // 유효하지 않은 입력일 경우 다시 입력 받음

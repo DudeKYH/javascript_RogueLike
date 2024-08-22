@@ -1,72 +1,26 @@
-import chalk from 'chalk';
-import readlineSync from 'readline-sync';
+import { Player } from './player.js';
+import { Stage } from './stage.js';
 
-class Player {
-  constructor() {
-    this.hp = 100;
-  }
+// chcp 65001
 
-  attack() {
-    // 플레이어의 공격
-  }
+function getRandomNumber(size, startNum) {
+    // Math.random() : 0 이상 1 미난의 난수 return
+    return startNum + Math.random() * size;
 }
-
-class Monster {
-  constructor() {
-    this.hp = 100;
-  }
-
-  attack() {
-    // 몬스터의 공격
-  }
-}
-
-function displayStatus(stage, player, monster) {
-  console.log(chalk.magentaBright(`\n=== Current Status ===`));
-  console.log(
-    chalk.cyanBright(`| Stage: ${stage} `) +
-      chalk.blueBright(`| 플레이어 정보`) +
-      chalk.redBright(`| 몬스터 정보 |`),
-  );
-  console.log(chalk.magentaBright(`=====================\n`));
-}
-
-const battle = async (stage, player, monster) => {
-  let logs = [];
-
-  while (player.hp > 0) {
-    console.clear();
-    displayStatus(stage, player, monster);
-
-    logs.forEach((log) => console.log(log));
-
-    console.log(chalk.green(`\n1. 공격한다 2. 아무것도 하지않는다.`));
-    const choice = readlineSync.question('당신의 선택은? ');
-
-    // 플레이어의 선택에 따라 다음 행동 처리
-    logs.push(chalk.green(`${choice}를 선택하셨습니다.`));
-  }
-};
 
 export async function startGame() {
-  console.clear();
-  const player = new Player();
-  let stage = 1;
+    console.clear();
+    const player = new Player();
+    let stageNum = 1;
 
-  while (stage <= 10) {
-    const monster = new Monster(stage);
-    await battle(stage, player, monster);
+    while (stageNum <= 10) {
+        const stage = new Stage(player, stageNum);
+        stage.battle();
 
-    // 스테이지 클리어 및 게임 종료 조건
+        // 스테이지 클리어, 도망가기 : true
+        // 스테이지 패배 : false
+        const stageResult = await stage.end();
 
-    stage++;
-  }
-}
-
-function hello() {
-  let tmp = 1;
-  let tmp2 = 1;
-  let tmp3 = 1;
-  let tmp4 = 1;
-  let tmp5 = 4;
+        stageNum = stageResult ? stageNum + 1 : 1;
+    }
 }
