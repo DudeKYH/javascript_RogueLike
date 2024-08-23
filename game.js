@@ -1,12 +1,7 @@
-import { Player } from './player.js';
-import { Stage } from './stage.js';
+import { Player } from './Class/Player/player.js';
+import { Stage } from './Class/Stage/stage.js';
 
 // chcp 65001
-
-export function getRandomNumber(size, startNum) {
-    // Math.random() : 0 이상 1 미난의 난수 return
-    return startNum + parseInt(Math.random() * size);
-}
 
 export async function startGame() {
     console.clear();
@@ -15,7 +10,7 @@ export async function startGame() {
 
     while (stageNum <= 10) {
         const stage = new Stage(player, stageNum);
-        stage.battle();
+        await stage.battle();
 
         // 스테이지 클리어, 도망가기 : true
         // 스테이지 패배 : false
