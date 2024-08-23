@@ -189,14 +189,16 @@ export class Stage {
 
     async end() {
         switch (this.stageStatus) {
+            // 스테이지 실패
             case stageStatusObjects.LOSE:
                 await this.lose();
                 return false;
 
+            // 스테이지 클리어
             case stageStatusObjects.CLEAR:
                 await this.clear();
                 return true;
-
+            // 스테이지 도망 성공
             case stageStatusObjects.ESCAPE:
                 await this.escape();
                 return true;
@@ -204,11 +206,13 @@ export class Stage {
             // 스테이지 강제 스킵
             case stageStatusObjects.SKIP:
                 return true;
+
             default:
                 break;
         }
     }
 
+    // 플레이어와 몬스터 전투 중의 Logic
     async battle() {
         while (this.stageStatus === stageStatusObjects.PLAYING) {
             console.clear();
@@ -228,6 +232,8 @@ export class Stage {
             this.logCount++;
         }
 
+        // stage가 끝나면 클라이언트에게 1초 동안 그동안의 전투 로그들을 출력해주고
+        // 스테이지 결과에 따른 Animation으로 넘어간다.
         console.clear();
         this.displayStatus(this.stageNum, this.player, this.monster);
 
@@ -261,11 +267,13 @@ export class Stage {
         const playerDamageArr = this.player.doubleAttack();
         let totalPlayerDamage = 0;
 
+        // 연속 공격 실패 시
         if (playerDamageArr === null) {
             this.logs.push(chalk.blue(`[${this.logCount}] 연속 공격에 실패했습니다...`));
             return;
         }
 
+        // 연속 공격 성공 시
         playerDamageArr.forEach((playerDamage) => {
             totalPlayerDamage += playerDamage;
             this.logs.push(
@@ -283,26 +291,30 @@ export class Stage {
         }
     }
 
-    // 필살기
+    // 필살기 이벤트
     eventSpecialAttack() {}
 
     // 도망가기 이벤트
     eventEscape() {
         const escapeResult = this.player.escape();
 
+        // 도망 실패 시
         if (!escapeResult) {
             this.logs.push(chalk.blue(`[${this.logCount}] 플레이어가 도망에 실패했습니다...`));
             return;
         }
 
+        // 도망 성공 시
         this.stageStatus = stageStatusObjects.ESCAPE;
         this.logs.push(chalk.red(`[${this.logCount}] 플레이어가 도망쳤습니다!`));
     }
 
+    // 강제 스킵 이벤트
     eventSkip() {
         this.stageStatus = stageStatusObjects.SKIP;
     }
 
+    // 몬스터 공격 이벤트
     eventMosterAttack() {
         // 만약 몬스터가 이전 플레이어 턴에 죽었다면 return
         if (this.stageStatus !== stageStatusObjects.PLAYING) return;

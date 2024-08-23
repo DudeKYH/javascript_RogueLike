@@ -2,6 +2,7 @@ import { checkObbs, getRandomFloat, getRandomInt } from '../../Random/random.js'
 
 const PLAYER = {
     HP: 100,
+    MP: 0,
     ATTACK_POWER: 10,
     POWER_RATIO: 1,
     ESCAPE_OBBS: 5,
@@ -13,6 +14,7 @@ Object.freeze(PLAYER);
 export class Player {
     constructor() {
         this.hp = PLAYER.HP;
+        this.mp = PLAYER.MP;
         this.baseAttackPower = PLAYER.ATTACK_POWER;
         this.powerRatio = PLAYER.POWER_RATIO;
         this.escapeObbs = PLAYER.ESCAPE_OBBS;
@@ -22,6 +24,7 @@ export class Player {
 
     init() {
         this.hp = PLAYER.HP;
+        this.mp = PLAYER.MP;
         this.baseAttackPower = PLAYER.ATTACK_POWER;
         this.powerRatio = PLAYER.POWER_RATIO;
         this.escapeObbs = PLAYER.ESCAPE_OBBS;
