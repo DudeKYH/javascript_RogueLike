@@ -1,6 +1,3 @@
-import { getRandomFloat } from './Random/random.js';
+const damage = 93 * 0.6;
 
-console.log(typeof getRandomFloat(0.2, 0.4));
-console.log(getRandomFloat(0.2, 0.4));
-console.log(getRandomFloat(0.2, 0.4));
-console.log(getRandomFloat(0.2, 0.4));
+console.log(damage);

@@ -40,11 +40,31 @@ export class Stage {
         const minPlayerDamage = this.player.baseAttackPower;
         const maxPlayerDamage = Math.floor(this.player.baseAttackPower * this.player.powerRatio);
 
+        let hpStr = '';
+
+        for (let i = 0; i < 20; i++) {
+            if (parseInt((this.player.hp / this.player.maxHP) * 20) > i) hpStr += '■';
+            else hpStr += '□';
+        }
+
+        let mpStr = '';
+
+        for (let i = 0; i < 20; i++) {
+            if (parseInt((this.player.mp / this.player.maxMP) * 20) > i) mpStr += '■';
+            else mpStr += '□';
+        }
+
         console.log(chalk.magentaBright(`\n=== Current Status ===`));
         console.log(
             chalk.cyanBright(`| Stage: ${this.stageNum} |\n`) +
                 chalk.blueBright(
-                    `| 플레이어 정보 => HP: ${this.player.hp}, ATTACK: ${minPlayerDamage}~${maxPlayerDamage}, DOUBLE_ATTACK: ${this.player.doubleAttackObbs}%, ESCAPE: ${this.player.escapeObbs}% |\n`,
+                    `| 플레이어 HP   => [${hpStr}] ${this.player.hp}/${this.player.maxHP} |\n`,
+                ) +
+                chalk.blueBright(
+                    `| 플레이어 MP   => [${mpStr}] ${this.player.mp}/${this.player.maxMP} |\n`,
+                ) +
+                chalk.blueBright(
+                    `| 플레이어 정보 => ATTACK: ${minPlayerDamage}~${maxPlayerDamage} / DOUBLE_ATTACK: ${this.player.doubleAttackObbs}% / DEFENSE: ${this.player.defenseObbs}% / ESCAPE: ${this.player.escapeObbs}% \n|`,
                 ) +
                 chalk.redBright(
                     `| 몬스터 정보 => HP:${this.monster.hp}, Attack: ${this.monster.attackPower} |`,
@@ -214,6 +234,12 @@ export class Stage {
 
     // 플레이어와 몬스터 전투 중의 Logic
     async battle() {
+        // 스테이지(2이상) 시작 전, 플레이어 회복
+        if (this.stageNum > 1) {
+            const revorHPAmount = this.player.recoverHP();
+            this.logs.push(chalk.green(`체력이 ${revorHPAmount} 회복되었습니다.`));
+        }
+
         while (this.stageStatus === stageStatusObjects.PLAYING) {
             console.clear();
             this.displayStatus(this.stageNum, this.player, this.monster);
@@ -222,7 +248,7 @@ export class Stage {
 
             console.log(
                 chalk.cyanBright(
-                    `\n1. 공격한다 / 2. 연속 공격 / 3. 필살기 / 4. 도망친다 / 5. 강제 스킵`,
+                    `\n1. 공격한다 / 2. 연속 공격 / 3. 필살기 / 4. 방어하기 / 5. 도망친다 / 6. 강제 스킵`,
                 ),
             );
             const choice = readlineSync.question('당신의 선택은? ');
@@ -247,11 +273,11 @@ export class Stage {
         // 1. 플레이어 선공격
         const playerDamage = this.player.attack();
 
+        const monsterDie = this.monster.hitted(playerDamage);
+
         this.logs.push(
             chalk.green(`[${this.logCount}] 몬스터에게 ${playerDamage}의 피해를 입혔습니다.`),
         );
-
-        const monsterDie = this.monster.hitted(playerDamage);
 
         // 몬스터 사망
         if (monsterDie) {
@@ -273,6 +299,8 @@ export class Stage {
             return;
         }
 
+        const monsterDie = this.monster.hitted(totalPlayerDamage);
+
         // 연속 공격 성공 시
         playerDamageArr.forEach((playerDamage) => {
             totalPlayerDamage += playerDamage;
@@ -280,8 +308,6 @@ export class Stage {
                 chalk.green(`[${this.logCount}] 몬스터에게 ${playerDamage}의 피해를 입혔습니다.`),
             );
         });
-
-        const monsterDie = this.monster.hitted(totalPlayerDamage);
 
         // 몬스터 사망
         if (monsterDie) {
@@ -292,7 +318,57 @@ export class Stage {
     }
 
     // 필살기 이벤트
-    eventSpecialAttack() {}
+    eventSpecialAttack() {
+        const spcialAttackDamage = this.player.specialAttack();
+
+        // 필살기 실패 (마나 부족)
+        if (spcialAttackDamage === null) {
+            this.logs.push(chalk.blue(`[${this.logCount}] 필살기에 사용할 MP가 부족합니다!`));
+            return;
+        }
+
+        const monsterDie = this.monster.hitted(spcialAttackDamage);
+
+        this.logs.push(
+            chalk.bgRed(
+                `[${this.logCount}] 필살기!!! 몬스터에게 ${spcialAttackDamage}의 피해를 입혔습니다.`,
+            ),
+        );
+
+        // 몬스터 사망
+        if (monsterDie) {
+            this.stageStatus = stageStatusObjects.CLEAR;
+            this.logs.push(chalk.red(`[${this.logCount}] 몬스터를 처치했습니다!`));
+            return;
+        }
+    }
+
+    // 방어 이벤트
+    eventDefense() {
+        const defenseDamage = this.player.defense();
+
+        // 도망 실패 시
+        if (defenseDamage === null) {
+            this.logs.push(chalk.blue(`[${this.logCount}] 플레이어가 방어에 실패했습니다...`));
+            return;
+        }
+
+        const monsterDie = this.monster.hitted(defenseDamage);
+
+        this.logs.push(chalk.greenBright(`[${this.logCount}] 플레이어가 방어에 성공했습니다!`));
+        this.logs.push(
+            chalk.green(
+                `[${this.logCount}] 반격으로 몬스터에게 ${defenseDamage}의 피해를 입혔습니다.`,
+            ),
+        );
+
+        // 몬스터 사망
+        if (monsterDie) {
+            this.stageStatus = stageStatusObjects.CLEAR;
+            this.logs.push(chalk.red(`[${this.logCount}] 몬스터를 처치했습니다!`));
+            return;
+        }
+    }
 
     // 도망가기 이벤트
     eventEscape() {
@@ -319,6 +395,13 @@ export class Stage {
         // 만약 몬스터가 이전 플레이어 턴에 죽었다면 return
         if (this.stageStatus !== stageStatusObjects.PLAYING) return;
 
+        // 플레이어가 방어하기 성공(player.defenseStatus가 true) 시
+        // 몬스터 공격 턴 무효화
+        if (this.player.defenseState === true) {
+            this.player.defenseState = false;
+            return;
+        }
+
         const monsterDamage = this.monster.attack();
         const playerDie = this.player.hitted(monsterDamage);
         this.logs.push(
@@ -335,6 +418,9 @@ export class Stage {
 
     logic(action) {
         // 플레이어 Event
+
+        let defenseResult;
+
         switch (action) {
             // 일반 공격
             case '1':
@@ -345,18 +431,27 @@ export class Stage {
             case '2':
                 this.eventDoubleAttack();
                 break;
+
             // 필살기
             case '3':
                 this.eventSpecialAttack();
                 break;
-            // 도망치기
+
+            // 방어
             case '4':
+                this.eventDefense();
+                break;
+
+            // 도망치기
+            case '5':
                 this.eventEscape();
                 break;
+
             // 강제스킵
-            case '5':
+            case '6':
                 this.eventSkip();
                 break;
+
             default:
                 break;
         }

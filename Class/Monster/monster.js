@@ -1,18 +1,18 @@
 import { getRandomInt } from '../../Random/random.js';
 
 const MONSTER = {
-    HP: 30,
+    HP: 20,
     ATTACKPOWER: 5,
 };
 Object.freeze(MONSTER);
 
 export class Monster {
     constructor(stage) {
-        this.hp = MONSTER.HP * stage;
-        if (stage !== 1) this.hp += getRandomInt(0, 10);
+        this.hp = MONSTER.HP;
+        if (stage !== 1) this.hp += stage * 10 + getRandomInt(0, 10);
 
-        this.attackPower = MONSTER.ATTACKPOWER * stage;
-        if (stage !== 1) this.attackPower += getRandomInt(0, 5);
+        this.attackPower = MONSTER.ATTACKPOWER;
+        if (stage !== 1) this.attackPower += getRandomInt(0, 2) + stage;
     }
 
     // 몬스터의 공격
