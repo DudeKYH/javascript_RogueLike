@@ -12,7 +12,7 @@ export class Monster {
         if (stage !== 1) this.hp += stage * 10 + getRandomInt(0, 10);
 
         this.attackPower = MONSTER.ATTACKPOWER;
-        if (stage !== 1) this.attackPower += getRandomInt(0, 2) + stage;
+        if (stage !== 1) this.attackPower += getRandomInt(0, 2) + stage * 3;
     }
 
     // 몬스터의 공격

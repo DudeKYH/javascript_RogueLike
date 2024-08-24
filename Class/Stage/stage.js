@@ -30,9 +30,29 @@ export class Stage {
         this.logCount = 1;
     }
 
-    // 일정 시간(timeDelay)동안 기다리는 함수
+    // 일정 시간(timeDelay) 기다리는 함수
     wait(timeDelay) {
-        return new Promise((resolve) => setTimeout(resolve, timeDelay));
+        return new Promise((resolve) => {
+            setTimeout(resolve, timeDelay);
+        });
+    }
+
+    // Func를 호출하고 일정 시간(timeDelay) 기다리는 함수
+    waitDelay(callBackFuncName, timeDelay) {
+        callBackFuncName();
+        return new Promise((resolve) => {
+            setTimeout(resolve, timeDelay);
+        });
+    }
+
+    // 일정 시간 간격(timeInterval) 마다 Func를 호출하고
+    // 일정 시간 후(timeDelay) 종료하는 함수
+    async waitInterval(callBackFuncName, timeInterval, timeDelay) {
+        const timeID = setInterval(callBackFuncName, timeInterval);
+
+        return new Promise((resolve) => setTimeout(resolve, timeDelay)).then(() => {
+            clearInterval(timeID);
+        });
     }
 
     // Stage, Player, Monster 정보를 출력하는 함수
@@ -157,27 +177,57 @@ export class Stage {
         );
     }
 
+    // 모든 Stage를 Clear 했을 때 출력하는 함수
+    displayAllClear() {
+        console.clear();
+
+        const red = getRandomInt(0, 255);
+        const green = getRandomInt(0, 255);
+        const blue = getRandomInt(0, 255);
+
+        console.log(
+            chalk.rgb(red, green, blue).bold(
+                figlet.textSync(`All Stage`, {
+                    font: 'Standard',
+                    horizontalLayout: 'default',
+                    verticalLayout: 'default',
+                }),
+            ),
+        );
+        console.log(
+            chalk.rgb(blue, red, green).bold(
+                figlet.textSync(`    Clear~~~`, {
+                    font: 'Standard',
+                    horizontalLayout: 'default',
+                    verticalLayout: 'default',
+                }),
+            ),
+        );
+    }
+
     // displayClear에 애니메이션 기능 추가
     async animateClear() {
         for (let i = 0; i < 10; i++) {
-            this.displayClear();
-            await this.wait(100);
+            await this.waitDelay(this.displayClear.bind(this), 100);
         }
     }
 
     // displayLose에 애니메이션 기능 추가
     async animateLose() {
         for (let i = 0; i < 10; i++) {
-            this.displayLose();
-            await this.wait(100);
+            await this.waitDelay(this.displayLose.bind(this), 100);
         }
     }
 
     // displayEsacpe에 애니메이션 기능 추가
     async animateEscape() {
+        await this.waitInterval(this.displayEscape.bind(this), 100, 1000);
+    }
+
+    // displayAllClear에 애니메이션 기능 추가
+    async animateAllClear() {
         for (let i = 0; i < 10; i++) {
-            this.displayEscape();
-            await this.wait(100);
+            await this.waitDelay(this.displayAllClear, 100);
         }
     }
 
@@ -265,7 +315,7 @@ export class Stage {
 
         this.logs.forEach((log) => console.log(log));
 
-        await this.wait(1000);
+        await this.waitDelay(() => {}, 1000);
     }
 
     // 일반 공격 이벤트

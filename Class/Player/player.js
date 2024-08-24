@@ -5,9 +5,9 @@ const PLAYER = {
     MP: 100,
     ATTACK_POWER: 10,
     POWER_RATIO: 1,
-    ESCAPE_OBBS: 5,
-    DOUBLE_ATTACK_OBBS: 5,
-    DEFENSE_OBBS: 5,
+    ESCAPE_OBBS: 80,
+    DOUBLE_ATTACK_OBBS: 50,
+    DEFENSE_OBBS: 50,
     RECOVER_HP: 30,
 };
 Object.freeze(PLAYER);
