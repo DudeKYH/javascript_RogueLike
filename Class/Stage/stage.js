@@ -47,7 +47,7 @@ export class Stage {
 
     // 일정 시간 간격(timeInterval) 마다 Func를 호출하고
     // 일정 시간 후(timeDelay) 종료하는 함수
-    async waitInterval(callBackFuncName, timeInterval, timeDelay) {
+    waitInterval(callBackFuncName, timeInterval, timeDelay) {
         const timeID = setInterval(callBackFuncName, timeInterval);
 
         return new Promise((resolve) => setTimeout(resolve, timeDelay)).then(() => {
@@ -373,7 +373,11 @@ export class Stage {
 
         // 필살기 실패 (마나 부족)
         if (spcialAttackDamage === null) {
-            this.logs.push(chalk.blue(`[${this.logCount}] 필살기에 사용할 MP가 부족합니다!`));
+            this.logs.push(
+                chalk.blue(
+                    `[${this.logCount}] 필살기에 사용할 MP가 부족합니다! 털썩 주저앉습니다.`,
+                ),
+            );
             return;
         }
 
