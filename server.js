@@ -55,12 +55,12 @@ async function handleUserInput() {
         case '2':
             console.log(chalk.yellow('구현 준비중입니다.. 게임을 시작하세요'));
             // 업적 확인하기 로직을 구현
-            handleUserInput();
+            await handleUserInput();
             break;
         case '3':
             console.log(chalk.blue('구현 준비중입니다.. 게임을 시작하세요'));
             // 옵션 메뉴 로직을 구현
-            handleUserInput();
+            await handleUserInput();
             break;
         case '4':
             console.log(chalk.red('게임을 종료합니다.'));
@@ -68,7 +68,7 @@ async function handleUserInput() {
             process.exit(0); // 게임 종료
         default:
             console.log(chalk.red('올바른 선택을 하세요.'));
-            handleUserInput(); // 유효하지 않은 입력일 경우 다시 입력 받음
+            await handleUserInput(); // 유효하지 않은 입력일 경우 다시 입력 받음
     }
 }
 

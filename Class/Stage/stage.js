@@ -1,7 +1,8 @@
 import chalk from 'chalk';
 import figlet from 'figlet';
 import readlineSync from 'readline-sync';
-import { getRandomInt } from '../../Random/random.js';
+import { getRandomInt } from '../../Util/Random/random.js';
+import { waitDelay, waitInterval } from '../../Util/Time/time.js';
 import { Monster } from '../Monster/monster.js';
 
 // stage의 상태
@@ -28,31 +29,6 @@ export class Stage {
         // 화면에 출력할 로그를 담을 array
         this.logs = [];
         this.logCount = 1;
-    }
-
-    // 일정 시간(timeDelay) 기다리는 함수
-    wait(timeDelay) {
-        return new Promise((resolve) => {
-            setTimeout(resolve, timeDelay);
-        });
-    }
-
-    // Func를 호출하고 일정 시간(timeDelay) 기다리는 함수
-    waitDelay(callBackFuncName, timeDelay) {
-        callBackFuncName();
-        return new Promise((resolve) => {
-            setTimeout(resolve, timeDelay);
-        });
-    }
-
-    // 일정 시간 간격(timeInterval) 마다 Func를 호출하고
-    // 일정 시간 후(timeDelay) 종료하는 함수
-    waitInterval(callBackFuncName, timeInterval, timeDelay) {
-        const timeID = setInterval(callBackFuncName, timeInterval);
-
-        return new Promise((resolve) => setTimeout(resolve, timeDelay)).then(() => {
-            clearInterval(timeID);
-        });
     }
 
     // Stage, Player, Monster 정보를 출력하는 함수
@@ -208,31 +184,31 @@ export class Stage {
     // displayClear에 애니메이션 기능 추가
     async animateClear() {
         for (let i = 0; i < 10; i++) {
-            await this.waitDelay(this.displayClear.bind(this), 100);
+            await waitDelay(this.displayClear.bind(this), 100);
         }
     }
 
     // displayLose에 애니메이션 기능 추가
     async animateLose() {
         for (let i = 0; i < 10; i++) {
-            await this.waitDelay(this.displayLose.bind(this), 100);
+            await waitDelay(this.displayLose.bind(this), 100);
         }
     }
 
     // displayEsacpe에 애니메이션 기능 추가
     async animateEscape() {
-        await this.waitInterval(this.displayEscape.bind(this), 100, 1000);
+        await waitInterval(this.displayEscape.bind(this), 100, 1000);
     }
 
     // displayAllClear에 애니메이션 기능 추가
     async animateAllClear() {
         for (let i = 0; i < 10; i++) {
-            await this.waitDelay(this.displayAllClear, 100);
+            await waitDelay(this.displayAllClear, 100);
         }
     }
 
     // clear 시, 수행할 Logic
-    async clear() {
+    async processClear() {
         console.clear();
         await this.animateClear();
 
@@ -241,7 +217,7 @@ export class Stage {
     }
 
     // lose 시, 수행할 Logic
-    async lose() {
+    async processLose() {
         console.clear();
         await this.animateLose();
 
@@ -250,27 +226,27 @@ export class Stage {
     }
 
     // escape 시, 수행할 Logic
-    async escape() {
+    async processEscape() {
         console.clear();
         await this.animateEscape();
 
         this.player.levelUp();
     }
 
-    async end() {
+    async checkResult() {
         switch (this.stageStatus) {
             // 스테이지 실패
             case stageStatusObjects.LOSE:
-                await this.lose();
+                await this.processLose();
                 return false;
 
             // 스테이지 클리어
             case stageStatusObjects.CLEAR:
-                await this.clear();
+                await this.processClear();
                 return true;
             // 스테이지 도망 성공
             case stageStatusObjects.ESCAPE:
-                await this.escape();
+                await this.processEscape();
                 return true;
 
             // 스테이지 강제 스킵
@@ -304,7 +280,7 @@ export class Stage {
             const choice = readlineSync.question('당신의 선택은? ');
 
             // 플레이어의 선택에 따라 다음 Logic 처리
-            this.logic(choice);
+            this.processBattle(choice);
             this.logCount++;
         }
 
@@ -315,7 +291,7 @@ export class Stage {
 
         this.logs.forEach((log) => console.log(log));
 
-        await this.waitDelay(() => {}, 1000);
+        await waitDelay(() => {}, 1000);
     }
 
     // 일반 공격 이벤트
@@ -323,18 +299,11 @@ export class Stage {
         // 1. 플레이어 선공격
         const playerDamage = this.player.attack();
 
-        const monsterDie = this.monster.hitted(playerDamage);
-
         this.logs.push(
             chalk.green(`[${this.logCount}] 몬스터에게 ${playerDamage}의 피해를 입혔습니다.`),
         );
 
-        // 몬스터 사망
-        if (monsterDie) {
-            this.stageStatus = stageStatusObjects.CLEAR;
-            this.logs.push(chalk.red(`[${this.logCount}] 몬스터를 처치했습니다!`));
-            return;
-        }
+        this.monster.hitted(playerDamage);
     }
 
     // 연속 공격 이벤트
@@ -349,8 +318,6 @@ export class Stage {
             return;
         }
 
-        const monsterDie = this.monster.hitted(totalPlayerDamage);
-
         // 연속 공격 성공 시
         playerDamageArr.forEach((playerDamage) => {
             totalPlayerDamage += playerDamage;
@@ -359,12 +326,7 @@ export class Stage {
             );
         });
 
-        // 몬스터 사망
-        if (monsterDie) {
-            this.stageStatus = stageStatusObjects.CLEAR;
-            this.logs.push(chalk.red(`[${this.logCount}] 몬스터를 처치했습니다!`));
-            return;
-        }
+        this.monster.hitted(totalPlayerDamage);
     }
 
     // 필살기 이벤트
@@ -381,20 +343,13 @@ export class Stage {
             return;
         }
 
-        const monsterDie = this.monster.hitted(spcialAttackDamage);
-
         this.logs.push(
             chalk.bgRed(
                 `[${this.logCount}] 필살기!!! 몬스터에게 ${spcialAttackDamage}의 피해를 입혔습니다.`,
             ),
         );
 
-        // 몬스터 사망
-        if (monsterDie) {
-            this.stageStatus = stageStatusObjects.CLEAR;
-            this.logs.push(chalk.red(`[${this.logCount}] 몬스터를 처치했습니다!`));
-            return;
-        }
+        this.monster.hitted(spcialAttackDamage);
     }
 
     // 방어 이벤트
@@ -407,8 +362,6 @@ export class Stage {
             return;
         }
 
-        const monsterDie = this.monster.hitted(defenseDamage);
-
         this.logs.push(chalk.greenBright(`[${this.logCount}] 플레이어가 방어에 성공했습니다!`));
         this.logs.push(
             chalk.green(
@@ -416,12 +369,7 @@ export class Stage {
             ),
         );
 
-        // 몬스터 사망
-        if (monsterDie) {
-            this.stageStatus = stageStatusObjects.CLEAR;
-            this.logs.push(chalk.red(`[${this.logCount}] 몬스터를 처치했습니다!`));
-            return;
-        }
+        this.monster.hitted(defenseDamage);
     }
 
     // 도망가기 이벤트
@@ -457,24 +405,38 @@ export class Stage {
         }
 
         const monsterDamage = this.monster.attack();
-        const playerDie = this.player.hitted(monsterDamage);
+
         this.logs.push(
             chalk.yellow(`[${this.logCount}] 몬스터가 ${monsterDamage}의 피해를 입혔습니다.`),
         );
 
-        // 플레이어 사망
-        if (playerDie) {
+        this.player.hitted(monsterDamage);
+    }
+
+    checkPlayerDie() {
+        if (this.stageStatus !== stageStatusObjects.PLAYING) return;
+
+        const playerDieResult = this.player.hp === 0 ? true : false;
+
+        if (playerDieResult) {
             this.stageStatus = stageStatusObjects.LOSE;
             this.logs.push(chalk.red(`[${this.logCount}] 플레이어가 사망했습니다!`));
-            return;
         }
     }
 
-    logic(action) {
+    checkMontserDie() {
+        if (this.stageStatus !== stageStatusObjects.PLAYING) return;
+
+        const monsterDieResult = this.monster.hp === 0 ? true : false;
+
+        if (monsterDieResult) {
+            this.stageStatus = stageStatusObjects.CLEAR;
+            this.logs.push(chalk.red(`[${this.logCount}] 몬스터를 처치했습니다!`));
+        }
+    }
+
+    processBattle(action) {
         // 플레이어 Event
-
-        let defenseResult;
-
         switch (action) {
             // 일반 공격
             case '1':
@@ -507,11 +469,19 @@ export class Stage {
                 break;
 
             default:
-                break;
+                return;
         }
+
+        // 플레이어 공격 Event 후 몬스터 사망 체크
+        // 사망했다면 Clear => 다음 스테이지로 이동
+        this.checkMontserDie();
 
         // 플레이어 공격 턴이 끝나면,
         // 몬스터 공격 Event
         this.eventMosterAttack();
+
+        // 몬스터 공격 Event 후 플레이어 사망 체크
+        // 사망했다면 Lose => 스테이지 초기화
+        this.checkPlayerDie();
     }
 }

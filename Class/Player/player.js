@@ -1,4 +1,4 @@
-import { checkObbs, getRandomFloat, getRandomInt } from '../../Random/random.js';
+import { checkObbs, getRandomFloat, getRandomInt } from '../../Util/Random/random.js';
 
 const PLAYER = {
     HP: 100,
@@ -118,14 +118,7 @@ export class Player {
     // 플레이어가 공격받음
     // => return : 죽으면 true / 살아있으면 false
     hitted(damage) {
-        const remainHP = this.hp - damage;
-
-        if (remainHP > 0) {
-            this.hp = remainHP;
-            return false;
-        } else {
-            return true;
-        }
+        this.hp = this.hp - damage > 0 ? this.hp - damage : 0;
     }
 
     // 플레이어의 도망

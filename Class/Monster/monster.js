@@ -1,4 +1,4 @@
-import { getRandomInt } from '../../Random/random.js';
+import { getRandomInt } from '../../Util/Random/random.js';
 
 const MONSTER = {
     HP: 20,
@@ -24,13 +24,6 @@ export class Monster {
     // 몬스터가 공격받음
     // => return : 죽으면 true / 살아있으면 false
     hitted(damage) {
-        const remainHP = this.hp - damage;
-
-        if (remainHP > 0) {
-            this.hp = remainHP;
-            return false;
-        } else {
-            return true;
-        }
+        this.hp = this.hp - damage > 0 ? this.hp - damage : 0;
     }
 }
