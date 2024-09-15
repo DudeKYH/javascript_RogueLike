@@ -101,7 +101,7 @@
 
     - hp, mp를 % 수치화하여 20등분한 그래프로 유저에게 보기 쉽게 시각화해주었다.
 
-3. 스테이지 전투 후 클리어/패배/도망가기 성공 , 모든 스테이지 클리어(올클리어) 시, 상황에 맞는 **Display Animation** 기능 구현${\textsf{\color{red}(가장 어려웠다!!!)}}$
+3. 스테이지 전투 후 클리어/패배/도망가기 성공 , 모든 스테이지 클리어(올클리어) 시, 상황에 맞는 **Display Animation** 기능 구현$\color{red}set\text\(가장 어려웠다!!!)$
 
     - 클리어/패배/올클리어 : `setTimeOut, promise, async/await`를 활용하여 구현
     - 도망가기 : `setInterval, setTimeOut, promise, async/await`를 활용하여 구현
